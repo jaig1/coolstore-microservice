@@ -16,7 +16,7 @@ function usage() {
     echo "   --delete            Clean up and remove demo projects and objects"
     echo "   --verify            Verify the demo is deployed correctly"
     echo "   --idle              Make all demo servies idle"
-    echo 
+    echo
     echo "Options:"
     echo "   --user              The admin user for the demo projects. mandatory if logged in as system:admin"
     echo "   --maven-mirror-url  Use the given Maven repository for builds. If not specifid, a Nexus container is deployed in the demo"
@@ -122,7 +122,7 @@ GITHUB_ACCOUNT=${GITHUB_ACCOUNT:-jbossdemocentral}
 GITHUB_REF=${GITHUB_REF:-stable-ocp-3.5}
 GITHUB_URI=https://github.com/$GITHUB_ACCOUNT/coolstore-microservice.git
 
-# maven 
+# maven
 MAVEN_MIRROR_URL=${ARG_MAVEN_MIRROR_URL:-http://nexus.$PRJ_CI.svc.cluster.local:8081/content/groups/public}
 
 GOGS_USER=developer
@@ -266,14 +266,14 @@ function wait_for_nexus_to_be_ready() {
   fi
 
   if [ -z "$ARG_MAVEN_MIRROR_URL" ] ; then # no maven mirror specified
-    wait_while_empty "Nexus" 600 "oc get ep nexus -o yaml -n $PRJ_CI | grep '\- addresses:'"
+    wait_while_empty "Nexus" 1200 "oc get ep nexus -o yaml -n $PRJ_CI | grep '\- addresses:'"
   fi
 }
 
 # Deploy Gogs
 function deploy_gogs() {
   echo_header "Deploying Gogs git server..."
-  
+
   local _TEMPLATE="https://raw.githubusercontent.com/OpenShiftDemos/gogs-openshift-docker/master/openshift/gogs-persistent-template.yaml"
   if [ "$ARG_EPHEMERAL" = true ] ; then
     _TEMPLATE="https://raw.githubusercontent.com/OpenShiftDemos/gogs-openshift-docker/master/openshift/gogs-template.yaml"
@@ -290,8 +290,8 @@ function deploy_gogs() {
   sleep 5
 
   # wait for Gogs to be ready
-  wait_while_empty "Gogs PostgreSQL" 600 "oc get ep gogs-postgresql -o yaml -n $PRJ_CI | grep '\- addresses:'"
-  wait_while_empty "Gogs" 600 "oc get ep gogs -o yaml -n $PRJ_CI | grep '\- addresses:'"
+  wait_while_empty "Gogs PostgreSQL" 1200 "oc get ep gogs-postgresql -o yaml -n $PRJ_CI | grep '\- addresses:'"
+  wait_while_empty "Gogs" 1200 "oc get ep gogs -o yaml -n $PRJ_CI | grep '\- addresses:'"
 
   sleep 20
 
@@ -352,7 +352,7 @@ EOM
 # Deploy Jenkins
 function deploy_jenkins() {
   echo_header "Deploying Jenkins..."
-  
+
   if [ "$ARG_EPHEMERAL" = true ] ; then
     oc new-app jenkins-ephemeral -l app=jenkins -p MEMORY_LIMIT=1Gi -n $PRJ_CI
   else
@@ -394,7 +394,7 @@ function deploy_coolstore_test_env() {
   # scale down to zero if minimal
   if [ "$ARG_MINIMAL" == true ] ; then
     scale_down_deployments $PRJ_COOLSTORE_TEST coolstore-gw web-ui inventory cart catalog catalog-mongodb inventory-postgresql
-  fi  
+  fi
 }
 
 # Deploy Coolstore into Coolstore PROD project
@@ -421,7 +421,7 @@ function deploy_coolstore_prod_env() {
   # scale down most pods to zero if minimal
   if [ "$ARG_MINIMAL" = true ] ; then
     scale_down_deployments $PRJ_COOLSTORE_PROD cart turbine-server hystrix-dashboard
-  fi  
+  fi
 }
 
 # Deploy Inventory service into Inventory DEV project
@@ -435,7 +435,7 @@ function deploy_inventory_dev_env() {
   # scale down to zero if minimal
   if [ "$ARG_MINIMAL" = true ] ; then
     scale_down_deployments $PRJ_INVENTORY inventory inventory-postgresql
-  fi  
+  fi
 }
 
 function build_images() {
@@ -449,21 +449,21 @@ function build_images() {
   for buildconfig in web-ui inventory cart catalog coolstore-gw
   do
     oc start-build $buildconfig -n $PRJ_COOLSTORE_TEST
-    wait_while_empty "$buildconfig build" 180 "oc get builds -n $PRJ_COOLSTORE_TEST | grep $buildconfig | grep Running"
+    wait_while_empty "$buildconfig build" 1200 "oc get builds -n $PRJ_COOLSTORE_TEST | grep $buildconfig | grep Running"
     sleep 10
   done
 }
 
 function promote_images() {
   # wait for builds
-  for buildconfig in coolstore-gw web-ui inventory cart catalog 
+  for buildconfig in coolstore-gw web-ui inventory cart catalog
   do
-    wait_while_empty "$buildconfig image" 600 "oc get builds -n $PRJ_COOLSTORE_TEST | grep $buildconfig | grep -v Running"
+    wait_while_empty "$buildconfig image" 1200 "oc get builds -n $PRJ_COOLSTORE_TEST | grep $buildconfig | grep -v Running"
     sleep 10
   done
 
   # verify successful builds
-  for buildconfig in coolstore-gw web-ui inventory cart catalog 
+  for buildconfig in coolstore-gw web-ui inventory cart catalog
   do
     if [ -z "$(oc get builds -n $PRJ_COOLSTORE_TEST | grep $buildconfig | grep Complete)" ]; then
       echo "ERROR: Build $buildconfig did not complete successfully"
@@ -525,7 +525,7 @@ function verify_build_and_deployments() {
   echo_header "Verifying build and deployments"
   # verify builds
   local _BUILDS_FAILED=false
-  for buildconfig in coolstore-gw web-ui inventory cart catalog 
+  for buildconfig in coolstore-gw web-ui inventory cart catalog
   do
     if [ -n "$(oc get builds -n $PRJ_COOLSTORE_TEST | grep $buildconfig | grep Failed)" ] && [ -z "$(oc get builds -n $PRJ_COOLSTORE_TEST | grep $buildconfig | grep Complete)" ]; then
       _BUILDS_FAILED=true
@@ -572,7 +572,7 @@ function deploy_guides() {
 
   if [ "$ARG_MINIMAL" = true ] ; then
     scale_down_deployments $PRJ_CI guides
-  fi  
+  fi
 }
 
 function make_idle() {
@@ -624,7 +624,7 @@ case "$ARG_COMMAND" in
         delete_projects
         exit 0
         ;;
-      
+
     verify)
         echo "Verifying MSA demo..."
         print_info
@@ -639,7 +639,7 @@ case "$ARG_COMMAND" in
 
     *)
         echo "Deploying MSA demo..."
-        create_projects 
+        create_projects
         print_info
         deploy_nexus
         wait_for_nexus_to_be_ready

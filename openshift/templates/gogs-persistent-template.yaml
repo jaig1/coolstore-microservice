@@ -157,7 +157,7 @@ objects:
       spec:
         containers:
         - image: " "
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           name: ${APPLICATION_NAME}
           ports:
           - containerPort: 3000

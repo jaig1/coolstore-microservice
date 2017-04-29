@@ -85,7 +85,7 @@ objects:
           - name: HOSTNAME_HTTP
             value: web-ui:8080
           image: web-ui
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           name: web-ui
           ports:
           - containerPort: 8080
@@ -356,7 +356,7 @@ objects:
           - name: DB_DATABASE
             value: inventorydb
           image: inventory
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           lifecycle:
             preStop:
               exec:
@@ -459,7 +459,7 @@ objects:
           - name: POSTGRESQL_DATABASE
             value: inventorydb
           image: postgresql
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           name: inventory-postgresql
           volumeMounts:
           - mountPath: /var/lib/pgsql/data
@@ -583,7 +583,7 @@ objects:
           - name: DB_SERVER
             value: catalog-mongodb
           image: catalog
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           name: catalog
           ports:
           - containerPort: 8778
@@ -814,7 +814,7 @@ objects:
           - name: CATALOG_ENDPOINT
             value: "http://catalog:8080"
           image: cart
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 5
             httpGet:
